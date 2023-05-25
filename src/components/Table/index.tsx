@@ -15,14 +15,13 @@ function Table<C extends string, R extends GridValidRowModel>(
   const apiRef = useGridApiRef();
 
   useEffect(() => {
-    (['paginationModelChange', 'sortModelChange'] as ('paginationModelChange' | 'sortModelChange')[])
-      .forEach(event => apiRef.current.subscribeEvent(
-        event,
-        () => {
-          const { sorting, pagination } = apiRef.current.exportState();
-          setTableSettings({ sorting, pagination });
-        }
-      ))
+    const listener = () => {
+      const { sorting, pagination } = apiRef.current.exportState();
+      setTableSettings({ sorting, pagination });
+    }
+
+    apiRef.current.subscribeEvent('paginationModelChange', listener);
+    apiRef.current.subscribeEvent('sortModelChange', listener);
   }, [])
 
   return (
@@ -52,6 +51,9 @@ const dataGridStyle: SxProps<Theme> = {
   '& .MuiDataGrid-columnHeader': {
     '&:focus': { outline: 'none' },
     '&:focus-within': { outline: 'none' },
+  },
+  '& .MuiDataGrid-virtualScroller': {
+    overflowX: 'hidden'
   },
   '& .MuiDataGrid-row': {
     marginLeft: '1px',
